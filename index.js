@@ -1,6 +1,8 @@
 require('dotenv').config();
+require('dotenv').config();
 const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
+const qrcode = require('qrcode-terminal'); // Add the QR code terminal package
 const messageHandler = require('./handlers/messageHandler');
 
 async function startSock() {
@@ -10,13 +12,19 @@ async function startSock() {
     const sock = makeWASocket({
         version,
         auth: state,
-        printQRInTerminal: true
+        printQRInTerminal: false, // Disable auto printQRInTerminal
     });
 
     sock.ev.on('creds.update', saveCreds);
 
     sock.ev.on('connection.update', (update) => {
-        const { connection, lastDisconnect } = update;
+        const { connection, lastDisconnect, qr } = update;
+
+        // Print the QR code to terminal if available
+        if (qr) {
+            qrcode.generate(qr, { small: true });
+        }
+
         if (connection === 'close') {
             const shouldReconnect = (lastDisconnect.error = new Boom(lastDisconnect?.error))?.output?.statusCode !== DisconnectReason.loggedOut;
             if (shouldReconnect) startSock();

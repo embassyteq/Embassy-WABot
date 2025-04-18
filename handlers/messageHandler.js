@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const ownerJid = '2348012345678@s.whatsapp.net';
+const ownerJid = '2348106670473@s.whatsapp.net';
 
 module.exports = async (sock, message) => {
     const from = message.key.remoteJid;
